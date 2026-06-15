@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synthesis Matrix — Absolute Intelligence / AGENTUM</title>
+  <meta name="description" content="Synthesis Matrix by Absolute Intelligence. The element you're missing.">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      --off-white: #F5F8FB;
+      --navy: #0A1636;
+      --pink: #FF2D9B;
+      --pink-deep: #E0207F;
+      --white: #FFFFFF;
+      --ink: #0E0E10;
+      --muted: #8A8A90;
+      --muted-dark: #A0A0A8;
+      --rule: rgba(10, 22, 54, 0.10);
+      --rule-dark: rgba(255, 255, 255, 0.12);
+      --sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --mono: "Courier New", Courier, monospace;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--off-white);
+      color: var(--navy);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: var(--pink);
+      color: var(--white);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Element tile component */
+    .element-tile {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--navy);
+      background: var(--white);
+      padding: clamp(0.75rem, 2vw, 1.25rem);
+      overflow: hidden;
+    }
+
+    .element-tile::before,
+    .element-tile::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: var(--pink);
+      border-style: solid;
+      transition: all 0.4s var(--ease-out);
+    }
+
+    .element-tile::before {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+
+    .element-tile::after {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .element-tile:hover::before,
+    .element-tile:hover::after {
+      width: 28px;
+      height: 28px;
+    }
+
+    .element-tile__meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .element-tile__symbol {
+      place-self: center;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--navy);
+    }
+
+    .element-tile__label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--navy);
+    }
+
+    .element-tile--dark {
+      background: var(--navy);
+      border-color: var(--rule-dark);
+    }
+
+    .element-tile--dark .element-tile__symbol,
+    .element-tile--dark .element-tile__label,
+    .element-tile--dark .element-tile__meta {
+      color: var(--off-white);
+    }
+
+    .element-tile--pink {
+      background: var(--pink);
+      border-color: var(--pink);
+    }
+
+    .element-tile--pink .element-tile__symbol,
+    .element-tile--pink .element-tile__label,
+    .element-tile--pink .element-tile__meta {
+      color: var(--white);
+    }
+
+    .element-tile--pink::before,
+    .element-tile--pink::after {
+      border-color: var(--white);
+    }
+
+    /* Header */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem clamp(1rem, 4vw, 2.5rem);
+      backdrop-filter: blur(12px);
+      background: rgba(245, 248, 251, 0.82);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+
+    .logo__tile {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--navy);
+      background: var(--white);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 0.35rem;
+      position: relative;
+    }
+
+    .logo__tile::before,
+    .logo__tile::after {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-color: var(--pink);
+      border-style: solid;
+    }
+
+    .logo__tile::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .logo__tile::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .logo__tile-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.4rem;
+      line-height: 1;
+      color: var(--muted);
+    }
+
+    .logo__tile-symbol {
+      place-self: center;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1.25rem;
+      line-height: 1;
+      color: var(--navy);
+    }
+
+    .logo__tile-label {
+      font-family: var(--mono);
+      font-size: 0.4rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .logo__wordmark {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1.125rem;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+    }
+
+    .logo__wordmark span {
+      color: var(--pink);
+    }
+
+    .nav-desktop {
+      display: none;
+      align-items: center;
+      gap: 2rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-desktop a {
+      position: relative;
+      padding: 0.25rem 0;
+    }
+
+    .nav-desktop a::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--pink);
+      transition: width 0.3s var(--ease-out);
+    }
+
+    .nav-desktop a:hover::after,
+    .nav-desktop a:focus::after {
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .nav-desktop { display: flex; }
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      background: var(--navy);
+      color: var(--white);
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--navy);
+      transition: all 0.3s var(--ease-out);
+      cursor: pointer;
+    }
+
+    .nav-cta:hover,
+    .nav-cta:focus {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: var(--white);
+    }
+
+    /* Section shell */
+    .section {
+      position: relative;
+      width: 100%;
+      padding: clamp(5rem, 12vw, 9rem) clamp(1rem, 4vw, 2.5rem);
+    }
+
+    .section__container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .section__eyebrow {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .section__title {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--navy);
+      max-width: 18ch;
+    }
+
+    .section__title .accent {
+      color: var(--pink);
+    }
+
+    .section__body {
+      font-size: clamp(1rem, 1.5vw, 1.125rem);
+      color: var(--muted);
+      max-width: 56ch;
+      margin-top: 1.25rem;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100dvh;
+      display: grid;
+      align-items: center;
+      background: var(--navy);
+      color: var(--off-white);
+      overflow: hidden;
+      padding-top: 6rem;
+    }
+
+    .hero__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: clamp(2.5rem, 6vw, 4rem);
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .hero__grid {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+    }
+
+    .hero__visual {
+      position: relative;
+      order: -1;
+    }
+
+    @media (min-width: 900px) {
+      .hero__visual { order: 1; }
+    }
+
+    .hero__tile {
+      width: min(100%, 420px);
+      margin: 0 auto;
+      aspect-ratio: 1 / 1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: clamp(1rem, 3vw, 2rem);
+      position: relative;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero__tile::before,
+    .hero__tile::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-color: var(--pink);
+      border-style: solid;
+      transition: all 0.6s var(--ease-out);
+    }
+
+    .hero__tile::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+    .hero__tile::after { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+
+    .hero__tile:hover::before,
+    .hero__tile:hover::after {
+      width: 48px;
+      height: 48px;
+    }
+
+    .hero__tile-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted-dark);
+    }
+
+    .hero__tile-symbol {
+      place-self: center;
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: clamp(5rem, 18vw, 11rem);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      color: var(--white);
+    }
+
+    .hero__tile-label {
+      font-family: var(--mono);
+      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--off-white);
+    }
+
+    .orbit {
+      position: absolute;
+      inset: -18%;
+      pointer-events: none;
+    }
+
+    .orbit__ring {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 45, 155, 0.18);
+      border-radius: 50%;
+      animation: orbit-spin 24s linear infinite;
+    }
+
+    .orbit__ring:nth-child(2) {
+      inset: 10%;
+      border-color: rgba(255, 255, 255, 0.10);
+      animation-duration: 18s;
+      animation-direction: reverse;
+    }
+
+    .orbit__ring:nth-child(3) {
+      inset: 22%;
+      border-color: rgba(255, 45, 155, 0.12);
+      animation-duration: 32s;
+    }
+
+    .orbit__node {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--pink);
+      border-radius: 50%;
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 4px rgba(255, 45, 155, 0.15);
+    }
+
+    .orbit__ring:nth-child(2) .orbit__node {
+      background: var(--white);
+      left: auto;
+      right: 0;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10);
+    }
+
+    .orbit__ring:nth-child(3) .orbit__node {
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes orbit-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      animation: particle-float 8s ease-in-out infinite;
+    }
+
+    @keyframes particle-float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+      50% { transform: translateY(-40px) translateX(20px); opacity: 0.8; }
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero__title {
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: clamp(2.75rem, 8vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      color: var(--white);
+    }
+
+    .hero__title span {
+      color: var(--pink);
+    }
+
+    .hero__subtitle {
+      font-size: clamp(1.125rem, 2vw, 1.375rem);
+      color: var(--muted-dark);
+      max-width: 44ch;
+      margin-top: 1.5rem;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--pink);
+      transform: translateX(-101%);
+      transition: transform 0.4s var(--ease-out);
+      z-index: -1;
+    }
+
+    .btn--primary {
+      background: var(--pink);
+      color: var(--white);
+      border-color: var(--pink);
+    }
+
+    .btn--primary:hover,
+    .btn--primary:focus {
+      background: var(--pink-deep);
+      border-color: var(--pink-deep);
+      transform: translateY(-2px);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--white);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn--ghost:hover,
+    .btn--ghost:focus {
+      border-color: var(--pink);
+      color: var(--white);
+    }
+
+    .btn--ghost:hover::before,
+    .btn--ghost:focus::before {
+      transform: translateX(0);
+    }
+
+    .btn--dark {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .btn--dark:hover,
+    .btn--dark:focus {
+      background: var(--pink);
+      border-color: var(--pink);
+      transform: translateY(-2px);
+    }
+
+    /* Services */
+    .services {
+      background: var(--off-white);
+    }
+
+    .services__header {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: clamp(3rem, 7vw, 5rem);
+    }
+
+    @media (min-width: 768px) {
+      .services__header {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+      }
+    }
+
+    .services__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+    }
+
+    @media (min-width: 768px) {
+      .services__grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .services__grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .service-card {
+      position: relative;
+      background: var(--white);
+      padding: clamp(1.25rem, 3vw, 2rem);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 1.25rem;
+      min-height: 260px;
+      transition: background 0.3s var(--ease-out);
+    }
+
+    .service-card::before,
+    .service-card::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-color: var(--pink);
+      border-style: solid;
+      transition: all 0.4s var(--ease-out);
+    }
+
+    .service-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .service-card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .service-card:hover {
+      background: rgba(255, 45, 155, 0.03);
+    }
+
+    .service-card:hover::before,
+    .service-card:hover::after {
+      width: 20px;
+      height: 20px;
+    }
+
+    .service-card__index {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .service-card__title {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: clamp(1.125rem, 2vw, 1.5rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+      align-self: center;
+    }
+
+    .service-card__tag {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--pink);
+    }
+
+    .service-card--featured {
+      grid-column: span 2;
+      background: var(--navy);
+    }
+
+    .service-card--featured .service-card__index,
+    .service-card--featured .service-card__title {
+      color: var(--off-white);
+    }
+
+    .service-card--featured .service-card__tag {
+      color: var(--pink);
+    }
+
+    @media (min-width: 768px) {
+      .service-card--featured { grid-column: span 1; }
+    }
+
+    /* Process / Proof */
+    .process {
+      background: var(--white);
+    }
+
+    .process__header {
+      margin-bottom: clamp(3rem, 7vw, 5rem);
+    }
+
+    .process__layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: clamp(2rem, 5vw, 4rem);
+    }
+
+    @media (min-width: 900px) {
+      .process__layout {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+
+    .process__steps {
+      display: grid;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+    }
+
+    .process-step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: clamp(1rem, 3vw, 2rem);
+      padding: clamp(1.25rem, 3vw, 2rem);
+      background: var(--off-white);
+      transition: background 0.3s var(--ease-out);
+    }
+
+    .process-step:hover {
+      background: var(--white);
+    }
+
+    .process-step__num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--pink);
+      width: 2.5rem;
+      height: 2.5rem;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--pink);
+      flex-shrink: 0;
+    }
+
+    .process-step__content h3 {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+    }
+
+    .process-step__content p {
+      color: var(--muted);
+      margin-top: 0.5rem;
+      max-width: 48ch;
+    }
+
+    .proof-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      height: fit-content;
+    }
+
+    .proof-cell {
+      background: var(--off-white);
+      padding: clamp(1.25rem, 2.5vw, 1.75rem);
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .proof-cell__value {
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--navy);
+    }
+
+    .proof-cell__label {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .proof-cell--full {
+      grid-column: span 2;
+      background: var(--navy);
+    }
+
+    .proof-cell--full .proof-cell__value,
+    .proof-cell--full .proof-cell__label {
+      color: var(--off-white);
+    }
+
+    .proof-cell--full .proof-cell__value span {
+      color: var(--pink);
+    }
+
+    /* CTA */
+    .cta {
+      background: var(--navy);
+      color: var(--white);
+      text-align: center;
+    }
+
+    .cta__inner {
+      position: relative;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem);
+      border: 1px solid var(--rule-dark);
+    }
+
+    .cta__inner::before,
+    .cta__inner::after {
+      content: "";
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-color: var(--pink);
+      border-style: solid;
+    }
+
+    .cta__inner::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; }
+    .cta__inner::after { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; }
+
+    .cta__eyebrow {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted-dark);
+      margin-bottom: 1rem;
+    }
+
+    .cta__title {
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .cta__title span {
+      color: var(--pink);
+    }
+
+    .cta__body {
+      font-size: clamp(1rem, 1.5vw, 1.125rem);
+      color: var(--muted-dark);
+      max-width: 52ch;
+      margin: 1.25rem auto 0;
+    }
+
+    .cta__actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--off-white);
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
+      border-top: 1px solid var(--rule);
+    }
+
+    .footer__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .footer__grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+      }
+    }
+
+    .footer__line {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer__line strong {
+      color: var(--navy);
+    }
+
+    .footer__line span {
+      color: var(--pink);
+    }
+
+    .footer__credit {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    @media (min-width: 768px) {
+      .footer__credit { text-align: right; }
+    }
+
+    /* Reveal base */
+    .reveal {
+      opacity: 1;
+      transform: translateY(24px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Focus rings */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--pink);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="#" class="logo" aria-label="Absolute Intelligence home">
+      <div class="logo__tile" aria-hidden="true">
+        <div class="logo__tile-meta"><span>119</span><span>[225]</span></div>
+        <div class="logo__tile-symbol">Ai</div>
+        <div class="logo__tile-label">AGENTUM</div>
+      </div>
+      <div class="logo__wordmark">Absolute <span>Intelligence</span></div>
+    </a>
+
+    <nav class="nav-desktop" aria-label="Primary navigation">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#proof">Proof</a>
+      <a href="#contact" class="nav-cta">Initiate Synthesis</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section" id="top">
+      <div class="section__container hero__grid">
+        <div class="hero__content">
+          <p class="section__eyebrow reveal" style="color: var(--muted-dark);">Concept 03 / Synthesis Matrix</p>
+          <h1 class="hero__title reveal">The element <span>you're missing.</span></h1>
+          <p class="hero__subtitle reveal">Synthesis Matrix is the operating layer for growth: brand, product and performance fused into one repeatable system. Built by Absolute Intelligence.</p>
+          <div class="hero__actions reveal">
+            <a href="#contact" class="btn btn--primary">Start the reaction</a>
+            <a href="#services" class="btn btn--ghost">Explore the matrix</a>
+          </div>
+        </div>
+
+        <div class="hero__visual reveal">
+          <div class="orbit" aria-hidden="true">
+            <div class="orbit__ring"><span class="orbit__node"></span></div>
+            <div class="orbit__ring"><span class="orbit__node"></span></div>
+            <div class="orbit__ring"><span class="orbit__node"></span></div>
+          </div>
+          <div class="particles" aria-hidden="true" id="particles"></div>
+          <div class="hero__tile">
+            <div class="hero__tile-meta"><span>119</span><span>[225]</span></div>
+            <div class="hero__tile-symbol">Ai</div>
+            <div class="hero__tile-label">AGENTUM</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="services section" id="services">
+      <div class="section__container">
+        <div class="services__header">
+          <div class="reveal">
+            <p class="section__eyebrow">01 — Services</p>
+            <h2 class="section__title">A periodic table of <span class="accent">growth capabilities.</span></h2>
+          </div>
+          <p class="section__body reveal">Each tile is a discrete capability. Combined, they form the compounds that accelerate your business.</p>
+        </div>
+
+        <div class="services__grid">
+          <article class="service-card reveal">
+            <span class="service-card__index">01</span>
+            <h3 class="service-card__title">Brand Synthesis</h3>
+            <span class="service-card__tag">Identity / Positioning</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">02</span>
+            <h3 class="service-card__title">Product Design</h3>
+            <span class="service-card__tag">UX / UI / Systems</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">03</span>
+            <h3 class="service-card__title">Engineering</h3>
+            <span class="service-card__tag">Frontend / Full-stack</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">04</span>
+            <h3 class="service-card__title">Performance Media</h3>
+            <span class="service-card__tag">Paid / Organic / CRO</span>
+          </article>
+          <article class="service-card service-card--featured reveal">
+            <span class="service-card__index">05</span>
+            <h3 class="service-card__title">Synthesis Matrix</h3>
+            <span class="service-card__tag">Integrated Operations</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">06</span>
+            <h3 class="service-card__title">Intelligence Layer</h3>
+            <span class="service-card__tag">Data / Automation / Ai</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">07</span>
+            <h3 class="service-card__title">Content Systems</h3>
+            <span class="service-card__tag">Editorial / Motion / Web</span>
+          </article>
+          <article class="service-card reveal">
+            <span class="service-card__index">08</span>
+            <h3 class="service-card__title">Go-to-Market</h3>
+            <span class="service-card__tag">Launch / Scale / Retain</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="process section" id="process">
+      <div class="section__container">
+        <div class="process__header reveal">
+          <p class="section__eyebrow">02 — Process</p>
+          <h2 class="section__title">How the matrix <span class="accent">synthesises.</span></h2>
+        </div>
+
+        <div class="process__layout">
+          <div class="process__steps">
+            <div class="process-step reveal">
+              <span class="process-step__num">01</span>
+              <div class="process-step__content">
+                <h3>Distil</h3>
+                <p>We map your market position, constraints and growth vectors into a single coherent brief.</p>
+              </div>
+            </div>
+            <div class="process-step reveal">
+              <span class="process-step__num">02</span>
+              <div class="process-step__content">
+                <h3>Compound</h3>
+                <p>Capabilities are combined into a tailored system — brand, product, media and automation.</p>
+              </div>
+            </div>
+            <div class="process-step reveal">
+              <span class="process-step__num">03</span>
+              <div class="process-step__content">
+                <h3>Catalyse</h3>
+                <p>We launch with tight feedback loops, measuring only the signals that drive real outcomes.</p>
+              </div>
+            </div>
+            <div class="process-step reveal">
+              <span class="process-step__num">04</span>
+              <div class="process-step__content">
+                <h3>Recalibrate</h3>
+                <p>The matrix learns. We tune the system weekly, not quarterly, so momentum compounds.</p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="proof-panel" id="proof" aria-label="Proof points">
+            <div class="proof-cell reveal">
+              <div class="proof-cell__value">119</div>
+              <div class="proof-cell__label">Atomic Number</div>
+            </div>
+            <div class="proof-cell reveal">
+              <div class="proof-cell__value">[225]</div>
+              <div class="proof-cell__label">Atomic Mass</div>
+            </div>
+            <div class="proof-cell proof-cell--full reveal">
+              <div class="proof-cell__value">Ai = <span>Absolute Intelligence</span></div>
+              <div class="proof-cell__label">Never artificial. Always elemental.</div>
+            </div>
+            <div class="proof-cell reveal">
+              <div class="proof-cell__value">4</div>
+              <div class="proof-cell__label">Phase Process</div>
+            </div>
+            <div class="proof-cell reveal">
+              <div class="proof-cell__value">1</div>
+              <div class="proof-cell__label">Agency Layer</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta section" id="contact">
+      <div class="section__container">
+        <div class="cta__inner reveal">
+          <p class="cta__eyebrow">03 — Initiate Synthesis</p>
+          <h2 class="cta__title">Ready to add the <span>missing element?</span></h2>
+          <p class="cta__body">Tell us what you're building. We'll show you the exact composition of brand, product and media needed to accelerate it.</p>
+          <div class="cta__actions">
+            <a href="mailto:hello@absoluteintelligence.io" class="btn btn--primary">Request a synthesis</a>
+            <a href="#top" class="btn btn--ghost">Back to top</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__grid">
+      <p class="footer__line"><strong>119</strong> <span>Ai</span> [225] — AGENTUM — Absolute <span>Intelligence</span></p>
+      <p class="footer__credit">Synthesis Matrix concept / No images / Inline build</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Particle field — no images, pure CSS nodes
+      const particleContainer = document.getElementById('particles');
+      if (particleContainer) {
+        const count = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 24;
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement('span');
+          p.className = 'particle';
+          p.style.left = Math.random() * 100 + '%';
+          p.style.top = Math.random() * 100 + '%';
+          p.style.animationDelay = (Math.random() * 6) + 's';
+          p.style.animationDuration = (6 + Math.random() * 6) + 's';
+          p.style.opacity = 0.2 + Math.random() * 0.5;
+          particleContainer.appendChild(p);
+        }
+      }
+
+      // GSAP scroll reveals
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!prefersReducedMotion) {
+          // Hero entrance
+          gsap.from('.hero__tile', {
+            scale: 0.92,
+            opacity: 0,
+            duration: 1,
+            ease: 'power3.out',
+            delay: 0.2
+          });
+
+          gsap.from('.hero__content .reveal', {
+            y: 30,
+            opacity: 0,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: 'power3.out',
+            delay: 0.4
+          });
+
+          // Section reveals
+          const revealGroups = document.querySelectorAll('.section:not(.hero)');
+          revealGroups.forEach(section => {
+            const items = section.querySelectorAll('.reveal');
+            gsap.fromTo(items,
+              { y: 24, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.7,
+                stagger: 0.08,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: section,
+                  start: 'top 78%',
+                  once: true
+                }
+              }
+            );
+          });
+
+          // Bracket draw emphasis on featured tile
+          gsap.from('.service-card--featured', {
+            y: 20,
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: '.service-card--featured',
+              start: 'top 80%',
+              once: true
+            }
+          });
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

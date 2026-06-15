@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absolute Intelligence — AGENTUM | Lost Archives Dossier</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+  <style>
+    :root {
+      --bg: #e7ecf2;
+      --bg-blue-hint: #e3e9f1;
+      --navy: #0A1636;
+      --pink: #FF2D9B;
+      --white: #FFFFFF;
+      --paper-trace: rgba(10,22,54,0.06);
+      --ink-faint: rgba(10,22,54,0.35);
+      --font-display: "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-mono: "Courier New", Courier, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
+    body {
+      background: var(--bg);
+      background: radial-gradient(circle at 20% 0%, var(--bg-blue-hint) 0%, var(--bg) 60%);
+      color: var(--navy);
+      font-family: var(--font-display);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Archive paper grain + faint grid */
+    .paper-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(var(--paper-trace) 1px, transparent 1px),
+        linear-gradient(90deg, var(--paper-trace) 1px, transparent 1px);
+      background-size: 120px 120px;
+      opacity: 0.7;
+    }
+    .paper-field::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      mix-blend-mode: multiply;
+    }
+
+    /* Concept stamp */
+    .concept-label {
+      position: fixed;
+      top: 26px;
+      right: 28px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--navy);
+      opacity: 0.55;
+      z-index: 100;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+    .concept-label::before {
+      content: "CONCEPT 03 — LOST ARCHIVES";
+      display: block;
+    }
+    .concept-name {
+      position: fixed;
+      bottom: 26px;
+      right: 28px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pink);
+      opacity: 0.7;
+      z-index: 100;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+    .concept-name::before { content: "THE DISCOVERY DOSSIER"; }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 28px 36px;
+      z-index: 90;
+      mix-blend-mode: multiply;
+    }
+    .nav-mark { display: flex; align-items: center; gap: 14px; }
+    .nav-box {
+      width: 44px;
+      height: 50px;
+      border: 1.5px solid var(--navy);
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.35);
+    }
+    .nav-box::before, .nav-box::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border: 1.5px solid var(--pink);
+    }
+    .nav-box::before { top: -4px; left: -4px; border-right: 0; border-bottom: 0; }
+    .nav-box::after { bottom: -4px; right: -4px; border-left: 0; border-top: 0; }
+    .nav-symbol { font-family: var(--font-mono); font-size: 20px; font-weight: 700; }
+    .nav-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: -0.02em; }
+    .nav-wordmark span { color: var(--pink); }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .nav-links a { color: var(--navy); text-decoration: none; position: relative; }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--pink);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+    section { position: relative; z-index: 2; width: 100%; }
+
+    /* UTILITIES */
+    .mono { font-family: var(--font-mono); }
+    .display { font-family: var(--font-display); }
+    .pink { color: var(--pink); }
+    .navy { color: var(--navy); }
+    .ink-faint { color: var(--ink-faint); }
+
+    .annotation {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pink);
+      position: relative;
+      display: inline-block;
+    }
+    .annotation::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--pink);
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+    .annotation-line {
+      position: absolute;
+      background: var(--pink);
+      opacity: 0.7;
+    }
+
+    .stamp {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: 1px solid var(--navy);
+      padding: 6px 12px;
+      display: inline-block;
+      transform: rotate(-4deg);
+      opacity: 0.85;
+    }
+    .stamp.pink-stamp { border-color: var(--pink); color: var(--pink); transform: rotate(3deg); }
+
+    /* HERO — editorial cover */
+    .hero {
+      min-height: 100vh;
+      padding: 120px 6vw 80px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 6vw;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left { position: relative; z-index: 3; }
+    .hero-kicker {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    .hero-kicker span { opacity: 0.55; }
+    .hero-kicker .pink { opacity: 1; }
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(52px, 8vw, 126px);
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      margin: 0;
+    }
+    .hero-title .line-pink { color: var(--pink); display: block; }
+    .hero-sub {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 420px;
+      margin-top: 36px;
+      opacity: 0.8;
+    }
+    .hero-meta {
+      margin-top: 44px;
+      display: flex;
+      gap: 48px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+    .hero-meta div { display: flex; flex-direction: column; gap: 6px; }
+    .hero-meta .label { opacity: 0.45; font-size: 9px; text-transform: uppercase; }
+
+    .hero-right {
+      position: relative;
+      height: 100%;
+      min-height: 560px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cropped-typo {
+      position: absolute;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--navy);
+      opacity: 0.06;
+      line-height: 0.78;
+      letter-spacing: -0.05em;
+      user-select: none;
+      pointer-events: none;
+    }
+    .cropped-typo.one { font-size: clamp(240px, 38vw, 540px); top: -6%; right: -18%; }
+    .cropped-typo.two { font-size: clamp(160px, 24vw, 340px); bottom: 8%; left: -22%; opacity: 0.05; }
+
+    .element-box {
+      width: clamp(220px, 30vw, 340px);
+      aspect-ratio: 1 / 1.12;
+      border: 2px solid var(--navy);
+      background: rgba(255,255,255,0.55);
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px 22px 16px;
+      z-index: 4;
+      box-shadow: 18px 24px 0 rgba(10,22,54,0.08);
+    }
+    .element-box::before, .element-box::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--pink);
+    }
+    .element-box::before { top: -8px; left: -8px; border-right: 0; border-bottom: 0; }
+    .element-box::after { bottom: -8px; right: -8px; border-left: 0; border-top: 0; }
+    .element-top {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: clamp(13px, 1.4vw, 18px);
+      font-weight: 700;
+    }
+    .element-symbol {
+      font-family: var(--font-mono);
+      font-size: clamp(72px, 10vw, 130px);
+      font-weight: 700;
+      line-height: 1;
+      align-self: center;
+      justify-self: center;
+      letter-spacing: -0.04em;
+    }
+    .element-label {
+      font-family: var(--font-mono);
+      font-size: clamp(12px, 1.3vw, 17px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-align: center;
+      border-top: 1px solid var(--navy);
+      padding-top: 10px;
+      margin-top: 8px;
+    }
+
+    .hero-annotation {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--pink);
+      z-index: 5;
+    }
+    .hero-annotation.a1 { top: 18%; left: 4%; transform: rotate(-90deg); transform-origin: left center; }
+    .hero-annotation.a2 { bottom: 16%; right: 6%; }
+    .hero-annotation.a2::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -40px;
+      width: 30px;
+      height: 1px;
+      background: var(--pink);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .scroll-hint::after {
+      content: "";
+      width: 1px;
+      height: 36px;
+      background: var(--navy);
+      opacity: 0.4;
+    }
+
+    /* HORIZONTAL DOSSIER */
+    .dossier-wrapper {
+      position: relative;
+      height: 400vh;
+    }
+    .dossier-pin {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      border-top: 1px solid var(--paper-trace);
+      border-bottom: 1px solid var(--paper-trace);
+    }
+    .dossier-track {
+      display: flex;
+      height: 100%;
+      width: fit-content;
+      will-change: transform;
+    }
+    .dossier-page {
+      width: 100vw;
+      height: 100vh;
+      flex-shrink: 0;
+      padding: 10vh 8vw;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6vw;
+      position: relative;
+    }
+    .dossier-page::before {
+      content: attr(data-page);
+      position: absolute;
+      bottom: 5vh;
+      right: 4vw;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      opacity: 0.35;
+    }
+    .page-left, .page-right { position: relative; }
+    .page-number {
+      position: absolute;
+      top: -6vh;
+      left: 0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--pink);
+      opacity: 0.8;
+    }
+    .page-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(36px, 5vw, 72px);
+      line-height: 0.95;
+      letter-spacing: -0.035em;
+      margin: 0 0 28px;
+    }
+    .page-body {
+      font-family: var(--font-display);
+      font-size: clamp(15px, 1.3vw, 19px);
+      line-height: 1.55;
+      opacity: 0.85;
+      max-width: 460px;
+    }
+    .page-body strong { color: var(--pink); font-weight: 700; }
+    .page-pull {
+      font-family: var(--font-mono);
+      font-size: clamp(18px, 2vw, 26px);
+      line-height: 1.35;
+      color: var(--navy);
+      border-left: 3px solid var(--pink);
+      padding-left: 22px;
+      margin-top: 36px;
+    }
+    .fragment-list {
+      margin-top: 40px;
+      list-style: none;
+      padding: 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      line-height: 1.9;
+    }
+    .fragment-list li {
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid var(--paper-trace);
+      padding: 10px 0;
+    }
+    .fragment-list .num { color: var(--pink); min-width: 32px; }
+
+    .specimen-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .specimen-cell {
+      border: 1px solid var(--navy);
+      padding: 18px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .specimen-cell .label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.5;
+    }
+    .specimen-cell .value {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .specimen-cell:nth-child(2) { background: var(--navy); color: var(--white); }
+    .specimen-cell:nth-child(2) .label { color: var(--white); opacity: 0.6; }
+
+    .large-watermark {
+      position: absolute;
+      right: -6vw;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(180px, 24vw, 360px);
+      color: var(--navy);
+      opacity: 0.04;
+      line-height: 0.8;
+      letter-spacing: -0.05em;
+      pointer-events: none;
+    }
+
+    /* EDITORIAL SECTIONS */
+    .editorial-section {
+      padding: 14vh 8vw;
+      position: relative;
+      overflow: hidden;
+    }
+    .editorial-grid {
+      display: grid;
+      grid-template-columns: 0.35fr 1fr;
+      gap: 6vw;
+      align-items: start;
+    }
+    .section-index {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pink);
+      position: sticky;
+      top: 120px;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      opacity: 0.85;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 96px);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      margin: 0 0 52px;
+      max-width: 900px;
+    }
+    .section-heading span { color: var(--pink); }
+
+    .value-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2vw;
+      margin-top: 60px;
+    }
+    .value-item {
+      border-top: 2px solid var(--navy);
+      padding-top: 22px;
+      position: relative;
+    }
+    .value-item::before {
+      content: attr(data-index);
+      position: absolute;
+      top: -14px;
+      left: 0;
+      background: var(--bg);
+      padding-right: 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--pink);
+    }
+    .value-item h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+    .value-item p {
+      font-family: var(--font-display);
+      font-size: 14px;
+      line-height: 1.55;
+      opacity: 0.8;
+      margin: 0;
+    }
+
+    /* SERVICE MANIFEST */
+    .manifest {
+      padding: 12vh 0;
+      position: relative;
+    }
+    .manifest-header {
+      padding: 0 8vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 8vh;
+    }
+    .manifest-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 88px);
+      line-height: 0.94;
+      letter-spacing: -0.04em;
+      margin: 0;
+      max-width: 700px;
+    }
+    .manifest-title span { color: var(--pink); }
+    .manifest-stamp { align-self: flex-start; }
+
+    .manifest-strip {
+      border-top: 1px solid var(--paper-trace);
+    }
+    .manifest-row {
+      display: grid;
+      grid-template-columns: 80px 1.4fr 1fr 120px;
+      gap: 3vw;
+      padding: 28px 8vw;
+      border-bottom: 1px solid var(--paper-trace);
+      align-items: center;
+      transition: background 0.3s ease;
+      cursor: default;
+    }
+    .manifest-row:hover { background: rgba(255,45,155,0.04); }
+    .manifest-row .row-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--pink);
+    }
+    .manifest-row .row-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(22px, 2.4vw, 34px);
+      letter-spacing: -0.02em;
+    }
+    .manifest-row .row-desc {
+      font-family: var(--font-display);
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.75;
+    }
+    .manifest-row .row-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      text-align: right;
+    }
+
+    /* PROOF / PROCESS */
+    .proof-section {
+      padding: 14vh 8vw;
+      position: relative;
+      background: var(--navy);
+      color: var(--white);
+      overflow: hidden;
+    }
+    .proof-section .paper-field { opacity: 0; }
+    .proof-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 88px);
+      line-height: 0.94;
+      letter-spacing: -0.04em;
+      margin: 0 0 64px;
+      max-width: 800px;
+    }
+    .proof-heading span { color: var(--pink); }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2vw;
+    }
+    .process-card {
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 28px 24px;
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.02);
+      transition: border-color 0.3s ease;
+    }
+    .process-card:hover { border-color: var(--pink); }
+    .process-card .step {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--pink);
+      opacity: 0.85;
+    }
+    .process-card h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 24px;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .process-card p {
+      font-family: var(--font-display);
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.7;
+      margin: 0;
+    }
+    .process-card .corner {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-top: 1px solid var(--pink);
+      border-right: 1px solid var(--pink);
+    }
+
+    .proof-stats {
+      margin-top: 72px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2vw;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 40px;
+    }
+    .stat-block .num {
+      font-family: var(--font-mono);
+      font-size: clamp(36px, 4vw, 56px);
+      font-weight: 700;
+      color: var(--pink);
+      line-height: 1;
+    }
+    .stat-block .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-top: 10px;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 16vh 8vw;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .cta-bg-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(120px, 22vw, 340px);
+      color: var(--navy);
+      opacity: 0.04;
+      letter-spacing: -0.05em;
+      line-height: 0.8;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .cta-heading {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(42px, 7vw, 110px);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      margin: 0 auto 32px;
+      max-width: 1100px;
+    }
+    .cta-heading span { color: var(--pink); }
+    .cta-body {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 520px;
+      margin: 0 auto 44px;
+      opacity: 0.8;
+    }
+    .cta-button {
+      position: relative;
+      z-index: 2;
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--white);
+      background: var(--pink);
+      padding: 20px 40px;
+      border: 1px solid var(--pink);
+      transition: all 0.3s ease;
+    }
+    .cta-button:hover {
+      background: transparent;
+      color: var(--pink);
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 8vh 8vw 6vh;
+      border-top: 1px solid var(--paper-trace);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      z-index: 2;
+    }
+    .footer-mark {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .footer-wordmark {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .footer-wordmark span { color: var(--pink); }
+    .footer-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      text-align: right;
+    }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 110px 24px 80px;
+        gap: 48px;
+      }
+      .hero-right { min-height: 420px; }
+      .cropped-typo.one { right: -30%; top: 0; }
+      .cropped-typo.two { left: -30%; bottom: 2%; }
+      .dossier-page {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 10vh 24px;
+      }
+      .page-heading { margin-bottom: 18px; }
+      .large-watermark { display: none; }
+      .editorial-grid { grid-template-columns: 1fr; gap: 32px; }
+      .section-index {
+        writing-mode: horizontal-tb;
+        transform: none;
+        position: relative;
+        top: auto;
+      }
+      .value-list { grid-template-columns: 1fr; gap: 32px; }
+      .manifest-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .manifest-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 24px;
+      }
+      .manifest-row .row-tag { text-align: left; }
+      .process-grid { grid-template-columns: 1fr; gap: 16px; }
+      .proof-stats { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      footer { flex-direction: column; align-items: flex-start; gap: 24px; }
+    }
+
+    @media (max-width: 600px) {
+      .hero-title { font-size: 48px; }
+      .hero-sub { font-size: 13px; }
+      .hero-meta { flex-direction: column; gap: 18px; }
+      .element-box { width: 220px; }
+      .specimen-grid { grid-template-columns: 1fr; }
+      .proof-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="paper-field"></div>
+
+  <div class="concept-label"></div>
+  <div class="concept-name"></div>
+
+  <nav>
+    <div class="nav-mark">
+      <div class="nav-box">
+        <span class="nav-symbol">Ai</span>
+      </div>
+      <div class="nav-wordmark">Absolute <span>Intelligence</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="#dossier">Dossier</a>
+      <a href="#manifest">Manifest</a>
+      <a href="#proof">Proof</a>
+      <a href="#cta">Request</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-left">
+      <div class="hero-kicker">
+        <span>Issue 119</span>
+        <span class="pink">[225]</span>
+        <span>Discovery Log</span>
+      </div>
+      <h1 class="hero-title">
+        The Element<br />
+        <span class="line-pink">of Agency.</span>
+      </h1>
+      <p class="hero-sub">
+        A newly indexed component in the periodic table of business operations. AGENTUM is the stable, autonomous intelligence layer that transforms fragmented workflows into coherent action.
+      </p>
+      <div class="hero-meta">
+        <div>
+          <span class="label">Atomic Number</span>
+          <span>119</span>
+        </div>
+        <div>
+          <span class="label">Atomic Mass</span>
+          <span>[225]</span>
+        </div>
+        <div>
+          <span class="label">State</span>
+          <span>Autonomous</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="cropped-typo one">Ai</div>
+      <div class="cropped-typo two">119</div>
+
+      <div class="element-box">
+        <div class="element-top">
+          <span>119</span>
+          <span>[225]</span>
+        </div>
+        <div class="element-symbol">Ai</div>
+        <div class="element-label">AGENTUM</div>
+      </div>
+
+      <div class="hero-annotation a1">Specimen — AG-119</div>
+      <div class="hero-annotation a2">Isolated 2026</div>
+    </div>
+
+    <div class="scroll-hint">Open Dossier</div>
+  </section>
+
+  <!-- HORIZONTAL DOSSIER -->
+  <section class="dossier-wrapper" id="dossier">
+    <div class="dossier-pin">
+      <div class="dossier-track">
+        <!-- Page 1 -->
+        <div class="dossier-page" data-page="01 / 04">
+          <div class="page-left">
+            <span class="page-number">DOSSIER 119 — 01</span>
+            <h2 class="page-heading">Discovered in the noise of modern operations.</h2>
+            <p class="page-body">
+              Every enterprise generates signal — data, decisions, delays. For decades that signal decayed into dashboards and meetings. <strong>AGENTUM</strong> is the stable catalyst that captures the signal and converts it into autonomous action.
+            </p>
+            <p class="page-pull">"The element does not replace the operator. It completes the reaction."</p>
+          </div>
+          <div class="page-right">
+            <div class="specimen-grid">
+              <div class="specimen-cell">
+                <span class="label">Electron config</span>
+                <span class="value">[Og] 8s¹</span>
+              </div>
+              <div class="specimen-cell">
+                <span class="label">Phase</span>
+                <span class="value">Active</span>
+              </div>
+              <div class="specimen-cell">
+                <span class="label">Discoverer</span>
+                <span class="value">ADL</span>
+              </div>
+              <div class="specimen-cell">
+                <span class="label">Stability</span>
+                <span class="value">Persistent</span>
+              </div>
+            </div>
+            <ul class="fragment-list">
+              <li><span class="num">01</span> First observed in high-velocity operations.</li>
+              <li><span class="num">02</span> Exhibits self-correcting behaviour.</li>
+              <li><span class="num">03</span> Bonds with existing systems without displacement.</li>
+            </ul>
+          </div>
+          <div class="large-watermark">01</div>
+        </div>
+
+        <!-- Page 2 -->
+        <div class="dossier-page" data-page="02 / 04">
+          <div class="page-left">
+            <span class="page-number">DOSSIER 119 — 02</span>
+            <h2 class="page-heading">What changes when intelligence becomes infrastructure?</h2>
+            <p class="page-body">
+              AGENTUM reframes AI from a tool into a layer. It sits beneath the interface, above the database, beside the team — routing, reasoning, and resolving without adding another tab to the browser.
+            </p>
+            <ul class="fragment-list">
+              <li><span class="num">A.</span> Autonomous task orchestration</li>
+              <li><span class="num">B.</span> Context-aware decision support</li>
+              <li><span class="num">C.</span> Continuous self-optimisation</li>
+              <li><span class="num">D.</span> Enterprise-grade traceability</li>
+            </ul>
+          </div>
+          <div class="page-right">
+            <div class="annotation" style="margin-bottom: 18px;">Core observation</div>
+            <p class="page-pull" style="border-left-color: var(--navy);">
+              The organisations that treat AI as an element, not an accessory, are the ones that stop asking "what can AI do?" and start asking "what can we finally stop doing?"
+            </p>
+            <div class="stamp" style="margin-top: 36px;">Verified</div>
+            <div class="stamp pink-stamp" style="margin-left: 12px;">Reactive</div>
+          </div>
+          <div class="large-watermark">02</div>
+        </div>
+
+        <!-- Page 3 -->
+        <div class="dossier-page" data-page="03 / 04">
+          <div class="page-left">
+            <span class="page-number">DOSSIER 119 — 03</span>
+            <h2 class="page-heading">Three valences of value.</h2>
+            <p class="page-body">
+              Like any element, AGENTUM bonds in predictable ways. We isolate three valences — <strong>Speed</strong>, <strong>Clarity</strong>, and <strong>Scale</strong> — each releasing energy previously trapped in manual coordination.
+            </p>
+            <div class="fragment-list">
+              <li><span class="num">V1</span> Compression — weeks into hours.</li>
+              <li><span class="num">V2</span> Resolution — ambiguity into decision.</li>
+              <li><span class="num">V3</span> Extension — one operator into many.</li>
+            </div>
+          </div>
+          <div class="page-right" style="display:flex; flex-direction:column; justify-content:center;">
+            <div class="specimen-grid" style="grid-template-columns: 1fr;">
+              <div class="specimen-cell" style="background: var(--pink); color: var(--white); border-color: var(--pink);">
+                <span class="label" style="color: var(--white); opacity: 0.7;">Compound</span>
+                <span class="value">AGENTUM + Workflow</span>
+              </div>
+              <div class="specimen-cell">
+                <span class="label">Result</span>
+                <span class="value">Coherent Action</span>
+              </div>
+            </div>
+          </div>
+          <div class="large-watermark">03</div>
+        </div>
+
+        <!-- Page 4 -->
+        <div class="dossier-page" data-page="04 / 04">
+          <div class="page-left">
+            <span class="page-number">DOSSIER 119 — 04</span>
+            <h2 class="page-heading">The archive is open. The element is ready.</h2>
+            <p class="page-body">
+              This dossier documents a live compound. AGENTUM is not theoretical — it is deployed, measured, and compounding inside the operations of teams that refused to let intelligence remain a side experiment.
+            </p>
+            <p class="page-pull">"We did not build an AI tool. We isolated a new element of operations."</p>
+          </div>
+          <div class="page-right" style="display:flex; align-items:flex-end; justify-content:flex-end;">
+            <div class="stamp pink-stamp" style="font-size: 14px; padding: 10px 18px;">Top Secret — Share Widely</div>
+          </div>
+          <div class="large-watermark">04</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITORIAL VALUE SECTION -->
+  <section class="editorial-section" id="values">
+    <div class="editorial-grid">
+      <div class="section-index">Field Notes — Value Profile</div>
+      <div>
+        <h2 class="section-heading">
+          Built for the operators,<br />
+          not the demo deck.
+        </h2>
+        <p class="page-body" style="max-width: 640px;">
+          Absolute Intelligence designs AGENTUM deployments as operational compounds: stable, measurable, and bonded to real outcomes. No theatre. No pilot purgatory. Just an element that works where the work happens.
+        </p>
+        <div class="value-list">
+          <div class="value-item" data-index="01">
+            <h4>Autonomous Execution</h4>
+            <p>AGENTUM closes loops, not just tickets. It routes work across tools, teams, and timezones while maintaining a complete decision trail.</p>
+          </div>
+          <div class="value-item" data-index="02">
+            <h4>Context Retention</h4>
+            <p>Memory is not bolted on. The element retains organisational context, preferences, and constraints across sessions and systems.</p>
+          </div>
+          <div class="value-item" data-index="03">
+            <h4>Measured Output</h4>
+            <p>Every action is observable. Return is calculated in hours returned, errors removed, and decisions accelerated.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICE MANIFEST -->
+  <section class="manifest" id="manifest">
+    <div class="manifest-header">
+      <h2 class="manifest-title">Service <span>Manifest</span></h2>
+      <div class="manifest-stamp stamp">Archive Ref: AG-119-SM</div>
+    </div>
+    <div class="manifest-strip">
+      <div class="manifest-row">
+        <span class="row-num">01</span>
+        <span class="row-title">Element Discovery</span>
+        <span class="row-desc">Audit the operational landscape and identify where autonomous intelligence compounds most aggressively.</span>
+        <span class="row-tag">Strategy</span>
+      </div>
+      <div class="manifest-row">
+        <span class="row-num">02</span>
+        <span class="row-title">Compound Design</span>
+        <span class="row-desc">Architect agent workflows, memory layers, and decision boundaries tailored to your systems.</span>
+        <span class="row-tag">Design</span>
+      </div>
+      <div class="manifest-row">
+        <span class="row-num">03</span>
+        <span class="row-title">Stable Deployment</span>
+        <span class="row-desc">Integrate AGENTUM into live environments with guardrails, observability, and rollback protocols.</span>
+        <span class="row-tag">Engineering</span>
+      </div>
+      <div class="manifest-row">
+        <span class="row-num">04</span>
+        <span class="row-title">Continuous Refinement</span>
+        <span class="row-desc">Tune behaviour, expand scope, and harden the compound as operational conditions evolve.</span>
+        <span class="row-tag">Operations</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF / PROCESS -->
+  <section class="proof-section" id="proof">
+    <h2 class="proof-heading">
+      From isolation<br />
+      to <span>integration.</span>
+    </h2>
+    <div class="process-grid">
+      <div class="process-card">
+        <span class="corner"></span>
+        <span class="step">Phase 01</span>
+        <h4>Signal Survey</h4>
+        <p>Map noise, friction, and repetition across the operation. Find where intelligence would actually be felt.</p>
+      </div>
+      <div class="process-card">
+        <span class="corner"></span>
+        <span class="step">Phase 02</span>
+        <h4>Agent Synthesis</h4>
+        <p>Build the AGENTUM compound: specialised agents with shared memory, clear authority, and measurable output.</p>
+      </div>
+      <div class="process-card">
+        <span class="corner"></span>
+        <span class="step">Phase 03</span>
+        <h4>Controlled Reaction</h4>
+        <p>Deploy inside a bounded scope with full observability. Validate impact before expanding the lattice.</p>
+      </div>
+      <div class="process-card">
+        <span class="corner"></span>
+        <span class="step">Phase 04</span>
+        <h4>Lattice Growth</h4>
+        <p>Expand the element across functions. The compound becomes infrastructure. The operation becomes self-healing.</p>
+      </div>
+    </div>
+
+    <div class="proof-stats">
+      <div class="stat-block">
+        <div class="num" data-count="119">0</div>
+        <div class="label">Deployments indexed</div>
+      </div>
+      <div class="stat-block">
+        <div class="num" data-count="42">0</div>
+        <div class="label">% avg. speed gain</div>
+      </div>
+      <div class="stat-block">
+        <div class="num" data-count="18">0</div>
+        <div class="label">Enterprise compounds</div>
+      </div>
+      <div class="stat-block">
+        <div class="num" data-count="225">0</div>
+        <div class="label">Million actions routed</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section" id="cta">
+    <div class="cta-bg-text">AGENTUM</div>
+    <h2 class="cta-heading">
+      Add the missing<br />
+      <span>element.</span>
+    </h2>
+    <p class="cta-body">
+      Request a classified briefing. We will map your operation, isolate the highest-value reaction, and propose an AGENTUM deployment plan.
+    </p>
+    <a href="#" class="cta-button">Request Briefing</a>
+  </section>
+
+  <footer>
+    <div class="footer-mark">
+      <div class="nav-box" style="width: 38px; height: 44px;">
+        <span class="nav-symbol" style="font-size: 17px;">Ai</span>
+      </div>
+      <div class="footer-wordmark">Absolute <span>Intelligence</span></div>
+    </div>
+    <div class="footer-meta">
+      <div>AGENTUM — Element 119 · Atomic Mass [225]</div>
+      <div>© 2026 Absolute Intelligence. All specimens reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Dossier horizontal scroll
+    const track = document.querySelector('.dossier-track');
+    const pages = document.querySelectorAll('.dossier-page');
+    const trackWidth = track.scrollWidth;
+
+    gsap.to(track, {
+      x: () => -(track.scrollWidth - window.innerWidth),
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".dossier-wrapper",
+        start: "top top",
+        end: () => "+=" + (track.scrollWidth - window.innerWidth),
+        scrub: 1,
+        pin: ".dossier-pin",
+        anticipatePin: 1,
+        invalidateOnRefresh: true
+      }
+    });
+
+    // Page interior reveals
+    pages.forEach((page, i) => {
+      const heading = page.querySelector('.page-heading');
+      const body = page.querySelector('.page-body');
+      const pull = page.querySelector('.page-pull');
+      const list = page.querySelector('.fragment-list');
+      const cells = page.querySelectorAll('.specimen-cell');
+      const wm = page.querySelector('.large-watermark');
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".dossier-wrapper",
+          start: () => `top+=${i * (window.innerWidth * 0.6)} top`,
+          end: () => `top+=${(i + 1) * (window.innerWidth * 0.6)} top`,
+          scrub: 1
+        }
+      });
+
+      tl.fromTo(heading, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, 0)
+        .fromTo(body, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, 0.08)
+        .fromTo(pull, { x: -30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.25 }, 0.15)
+        .fromTo(list, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, 0.2)
+        .fromTo(cells, { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.04, duration: 0.2 }, 0.12)
+        .fromTo(wm, { x: 60, opacity: 0 }, { x: 0, opacity: 0.04, duration: 0.3 }, 0);
+    });
+
+    // Hero entrance
+    gsap.from('.hero-left > *', {
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.12,
+      ease: 'power3.out',
+      delay: 0.2
+    });
+
+    gsap.from('.element-box', {
+      scale: 0.9,
+      opacity: 0,
+      rotation: -3,
+      duration: 1.2,
+      ease: 'power3.out',
+      delay: 0.4
+    });
+
+    gsap.from('.cropped-typo', {
+      x: (i) => i === 0 ? 100 : -100,
+      opacity: 0,
+      duration: 1.4,
+      ease: 'power2.out',
+      delay: 0.2
+    });
+
+    // Editorial reveals
+    gsap.utils.toArray('.editorial-section .section-heading, .editorial-section .page-body, .value-item').forEach((el, i) => {
+      gsap.from(el, {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        }
+      });
+    });
+
+    // Manifest rows
+    gsap.utils.toArray('.manifest-row').forEach((row, i) => {
+      gsap.from(row, {
+        x: -40,
+        opacity: 0,
+        duration: 0.7,
+        delay: i * 0.05,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: row,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        }
+      });
+    });
+
+    // Proof section
+    gsap.from('.proof-heading', {
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.proof-section',
+        start: 'top 70%'
+      }
+    });
+
+    gsap.utils.toArray('.process-card').forEach((card, i) => {
+      gsap.from(card, {
+        y: 60,
+        opacity: 0,
+        duration: 0.8,
+        delay: i * 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.process-grid',
+          start: 'top 75%'
+        }
+      });
+    });
+
+    // Stat counters
+    const statNums = document.querySelectorAll('.stat-block .num');
+    statNums.forEach(num => {
+      const target = parseInt(num.dataset.count, 10);
+      ScrollTrigger.create({
+        trigger: num,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.to(num, {
+            innerText: target,
+            duration: 2,
+            snap: { innerText: 1 },
+            ease: 'power2.out',
+            onUpdate: function() {
+              num.innerText = Math.round(this.targets()[0].innerText);
+            }
+          });
+        }
+      });
+    });
+
+    // CTA
+    gsap.from('.cta-heading, .cta-body, .cta-button', {
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.12,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '.cta-section',
+        start: 'top 70%'
+      }
+    });
+
+    // Smooth scroll for nav
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          gsap.to(window, { duration: 1, scrollTo: { y: target, offsetY: 0 }, ease: 'power2.inOut' });
+        }
+      });
+    });
+
+    // Refresh ScrollTrigger on load
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+  </script>
+</body>
+</html>

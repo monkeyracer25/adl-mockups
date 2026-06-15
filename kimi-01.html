@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absolute Intelligence — AGENTUM | Discovery Protocol</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --bg-alt: #e8ecf2;
+      --navy: #0A1636;
+      --pink: #FF2D9B;
+      --white: #FFFFFF;
+      --grid: rgba(10,22,54,0.08);
+      --font-display: "Neue Haas Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-mono: "Courier New", Courier, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--navy);
+      font-family: var(--font-display);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background grid */
+    .grid-field {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.6;
+    }
+
+    .concept-label {
+      position: fixed;
+      top: 24px;
+      right: 28px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--navy);
+      opacity: 0.5;
+      z-index: 100;
+      mix-blend-mode: multiply;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 40px;
+      z-index: 90;
+      mix-blend-mode: multiply;
+    }
+    .nav-mark {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-box {
+      width: 46px;
+      height: 52px;
+      border: 1.5px solid var(--navy);
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .nav-box::before, .nav-box::after {
+      content: "";
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border: 1.5px solid var(--pink);
+    }
+    .nav-box::before { top: -4px; left: -4px; border-right: 0; border-bottom: 0; }
+    .nav-box::after { bottom: -4px; right: -4px; border-left: 0; border-top: 0; }
+    .nav-symbol { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+    .nav-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 16px; letter-spacing: -0.02em; }
+    .nav-wordmark span { color: var(--pink); }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .nav-links a { color: var(--navy); text-decoration: none; position: relative; }
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--pink);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+    section {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 420px 1fr;
+      align-items: center;
+      padding: 0 8vw;
+    }
+    .hero-center {
+      position: relative;
+      height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .atom {
+      width: 340px;
+      height: 340px;
+      position: relative;
+    }
+    .atom-core {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid var(--navy);
+      opacity: 0.25;
+    }
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px solid var(--navy);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.3;
+    }
+    .orbit:nth-child(2) { width: 260px; height: 260px; --rx: 60deg; --ry: 0deg; }
+    .orbit:nth-child(3) { width: 260px; height: 260px; --rx: 0deg; --ry: 60deg; }
+    .orbit:nth-child(4) { width: 180px; height: 180px; --rx: 45deg; --ry: 45deg; }
+    .electron {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 14px var(--pink);
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .orbit:nth-child(2) { animation: spin 6s linear infinite; }
+    .orbit:nth-child(3) { animation: spin 9s linear infinite reverse; }
+    .orbit:nth-child(4) { animation: spin 4.5s linear infinite; }
+    @keyframes spin {
+      from { transform: translate(-50%, -50%) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(0deg); }
+      to { transform: translate(-50%, -50%) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) rotateZ(360deg); }
+    }
+
+    .element-box {
+      position: absolute;
+      width: 220px;
+      height: 250px;
+      border: 2px solid var(--navy);
+      background: rgba(243,245,248,0.85);
+      backdrop-filter: blur(6px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      place-items: center;
+      z-index: 5;
+    }
+    .element-box::before, .element-box::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--pink);
+    }
+    .element-box::before { top: -7px; left: -7px; border-right: 0; border-bottom: 0; }
+    .element-box::after { bottom: -7px; right: -7px; border-left: 0; border-top: 0; }
+    .eb-atomic { font-family: var(--font-mono); font-size: 14px; justify-self: start; }
+    .eb-mass { font-family: var(--font-mono); font-size: 14px; justify-self: end; }
+    .eb-symbol {
+      grid-column: 1 / -1;
+      font-family: var(--font-mono);
+      font-size: 96px;
+      font-weight: 700;
+      line-height: 1;
+      align-self: center;
+    }
+    .eb-name {
+      grid-column: 1 / -1;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      align-self: end;
+    }
+
+    .hero-left, .hero-right {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(10,22,54,0.5);
+      line-height: 1.8;
+    }
+    .hero-left { text-align: left; }
+    .hero-right { text-align: right; }
+
+    .hero-title {
+      position: absolute;
+      bottom: 12vh;
+      left: 8vw;
+      right: 8vw;
+      text-align: center;
+    }
+    .hero-title h1 {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 5.5vw, 88px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      margin: 0;
+    }
+    .hero-title h1 span { color: var(--pink); }
+    .hero-title p {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 24px;
+      opacity: 0.6;
+    }
+
+    /* Mass counter strip */
+    .mass-strip {
+      height: 180px;
+      border-top: 1px solid var(--grid);
+      border-bottom: 1px solid var(--grid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      overflow: hidden;
+      background: linear-gradient(90deg, transparent, rgba(255,45,155,0.03), transparent);
+    }
+    .mass-value {
+      font-family: var(--font-mono);
+      font-size: clamp(80px, 12vw, 160px);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--navy);
+      min-width: 360px;
+      text-align: center;
+    }
+    .mass-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      max-width: 160px;
+      line-height: 1.6;
+      color: rgba(10,22,54,0.55);
+    }
+
+    /* Statement */
+    .statement {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      padding: 0 14vw;
+      background: var(--bg-alt);
+    }
+    .statement p {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.6vw, 54px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.18;
+      margin: 0;
+    }
+    .statement p em {
+      color: var(--pink);
+      font-style: normal;
+    }
+
+    /* Services */
+    .services {
+      padding: 140px 8vw;
+    }
+    .section-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 90px;
+      align-items: end;
+    }
+    .section-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4vw, 64px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 0;
+    }
+    .section-header .lead {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(10,22,54,0.65);
+      max-width: 420px;
+      justify-self: end;
+    }
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--grid);
+      border: 1px solid var(--grid);
+    }
+    .service-cell {
+      background: var(--bg);
+      padding: 54px 44px;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+    .service-cell:hover { background: var(--white); }
+    .service-cell:hover .sc-index { color: var(--pink); }
+    .sc-index {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      margin-bottom: 30px;
+      display: block;
+    }
+    .sc-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 18px;
+    }
+    .sc-desc {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: rgba(10,22,54,0.6);
+      margin: 0;
+    }
+
+    /* Process */
+    .process {
+      padding: 140px 0;
+      overflow: hidden;
+    }
+    .process-inner {
+      width: 300vw;
+      display: flex;
+      padding: 0 8vw;
+      gap: 8vw;
+    }
+    .process-step {
+      width: 60vw;
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    .ps-number {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--pink);
+      letter-spacing: 0.12em;
+      padding-top: 12px;
+    }
+    .ps-body h3 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4.5vw, 72px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 0 0 30px;
+    }
+    .ps-body p {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(10,22,54,0.65);
+      max-width: 520px;
+      margin: 0;
+    }
+
+    /* Proof */
+    .proof {
+      padding: 160px 8vw;
+      background: var(--navy);
+      color: var(--white);
+      position: relative;
+    }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.12);
+      margin-bottom: 100px;
+    }
+    .proof-cell {
+      background: var(--navy);
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .proof-cell .value {
+      font-family: var(--font-mono);
+      font-size: clamp(40px, 5vw, 72px);
+      font-weight: 700;
+      color: var(--pink);
+      display: block;
+      margin-bottom: 12px;
+    }
+    .proof-cell .label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+    .quote {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .quote p {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 3vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin: 0 0 30px;
+    }
+    .quote cite {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      font-style: normal;
+    }
+
+    /* CTA */
+    .cta {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 8vw;
+      position: relative;
+    }
+    .cta-element {
+      width: 160px;
+      height: 180px;
+      border: 2px solid var(--navy);
+      display: grid;
+      place-items: center;
+      margin-bottom: 60px;
+      position: relative;
+    }
+    .cta-element::before, .cta-element::after {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--pink);
+    }
+    .cta-element::before { top: -6px; left: -6px; border-right: 0; border-bottom: 0; }
+    .cta-element::after { bottom: -6px; right: -6px; border-left: 0; border-top: 0; }
+    .cta-element span {
+      font-family: var(--font-mono);
+      font-size: 72px;
+      font-weight: 700;
+    }
+    .cta h2 {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 6vw, 96px);
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      margin: 0 0 40px;
+    }
+    .cta h2 span { color: var(--pink); }
+    .cta p {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(10,22,54,0.6);
+      max-width: 460px;
+      margin: 0 0 40px;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--navy);
+      color: var(--white);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 22px 42px;
+      border: 1px solid var(--navy);
+      transition: all 0.3s ease;
+    }
+    .cta-btn:hover {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: var(--white);
+    }
+
+    footer {
+      padding: 50px 8vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--grid);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(10,22,54,0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; padding-top: 120px; text-align: center; }
+      .hero-left, .hero-right { display: none; }
+      .hero-center { height: 380px; }
+      .atom { width: 280px; height: 280px; }
+      .service-grid { grid-template-columns: 1fr; }
+      .section-header { grid-template-columns: 1fr; }
+      .section-header .lead { justify-self: start; }
+      .proof-grid { grid-template-columns: repeat(2, 1fr); }
+      .process-step { width: 80vw; grid-template-columns: 1fr; gap: 20px; }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 20px 24px; }
+      .nav-links { display: none; }
+      .hero-title { bottom: 8vh; }
+      .atom { width: 220px; height: 220px; }
+      .orbit:nth-child(2), .orbit:nth-child(3) { width: 180px; height: 180px; }
+      .orbit:nth-child(4) { width: 120px; height: 120px; }
+      .element-box { width: 170px; height: 196px; }
+      .eb-symbol { font-size: 72px; }
+      .service-cell { padding: 40px 28px; }
+      .proof-grid { grid-template-columns: 1fr; }
+      .cta-element { width: 120px; height: 136px; }
+      .cta-element span { font-size: 52px; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-field"></div>
+  <div class="concept-label">Concept 01 — Discovery Protocol</div>
+
+  <nav>
+    <div class="nav-mark">
+      <div class="nav-box"><span class="nav-symbol">Ai</span></div>
+      <div class="nav-wordmark">Absolute <span>Intelligence</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#proof">Proof</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-left">
+      LAT 51.5074° N<br/>LON 0.1278° W<br/>STATUS: STABLE
+    </div>
+    <div class="hero-center">
+      <div class="atom" id="atom">
+        <div class="atom-core"></div>
+        <div class="orbit"><div class="electron"></div></div>
+        <div class="orbit"><div class="electron"></div></div>
+        <div class="orbit"><div class="electron"></div></div>
+      </div>
+      <div class="element-box" id="elementBox">
+        <span class="eb-atomic">119</span>
+        <span class="eb-mass">225</span>
+        <span class="eb-symbol">Ai</span>
+        <span class="eb-name">Agentum</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      SYNTHESIS v4.2<br/>PURITY 99.997%<br/>HALF-LIFE: INDEFINITE
+    </div>
+    <div class="hero-title">
+      <h1>The discovered element<br/>of <span>intelligence</span>.</h1>
+      <p>Agentum — atomic number 119 — is the foundational unit of Absolute Intelligence.</p>
+    </div>
+  </section>
+
+  <section class="mass-strip">
+    <div class="mass-value" id="massCounter">000</div>
+    <div class="mass-label">Atomic mass<br/>standard units</div>
+  </section>
+
+  <section class="statement">
+    <p>We do not bolt AI onto broken processes. We isolate the active ingredient — <em>agentic reasoning</em> — and synthesise systems that think, decide, and ship.</p>
+  </section>
+
+  <section class="services" id="services">
+    <div class="section-header">
+      <h2>Capabilities</h2>
+      <p class="lead">Every engagement begins with the same question: what is the smallest, highest-leverage unit of intelligence we can introduce?</p>
+    </div>
+    <div class="service-grid">
+      <div class="service-cell">
+        <span class="sc-index">01 / AGENT DESIGN</span>
+        <h3 class="sc-title">Autonomous Agents</h3>
+        <p class="sc-desc">Single-purpose reasoning systems that research, plan, and execute across tools, APIs, and unstructured data.</p>
+      </div>
+      <div class="service-cell">
+        <span class="sc-index">02 / SYNTHESIS</span>
+        <h3 class="sc-title">Workflow Alchemy</h3>
+        <p class="sc-desc">Reforge manual operations into self-hearing pipelines — approval loops, exception handling, and audit trails included.</p>
+      </div>
+      <div class="service-cell">
+        <span class="sc-index">03 / CALIBRATION</span>
+        <h3 class="sc-title">Model Fine-Tuning</h3>
+        <p class="sc-desc">Domain-specific tuning and evaluation frameworks that turn generic models into proprietary competitive advantages.</p>
+      </div>
+      <div class="service-cell">
+        <span class="sc-index">04 / COMPOUNDS</span>
+        <h3 class="sc-title">Product Systems</h3>
+        <p class="sc-desc">End-to-end product builds where AI is the primary interface, not a side panel.</p>
+      </div>
+      <div class="service-cell">
+        <span class="sc-index">05 / ISOTOPES</span>
+        <h3 class="sc-title">Knowledge Bases</h3>
+        <p class="sc-desc">Living memory systems that ingest, connect, and retrieve institutional knowledge on demand.</p>
+      </div>
+      <div class="service-cell">
+        <span class="sc-index">06 / REACTIONS</span>
+        <h3 class="sc-title">Go-to-Market AI</h3>
+        <p class="sc-desc">Intelligent content, outbound, and conversion loops engineered for compounding growth.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="process" id="process">
+    <div class="process-inner" id="processInner">
+      <div class="process-step">
+        <span class="ps-number">PHASE 01</span>
+        <div class="ps-body">
+          <h3>Isolate</h3>
+          <p>We map the atomic structure of your operation: the decisions that repeat, the data that silos, and the handovers that leak velocity.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <span class="ps-number">PHASE 02</span>
+        <div class="ps-body">
+          <h3>Synthesise</h3>
+          <p>A small, high-fidelity agent is built and benchmarked against real outcomes — not demo prompts. We prove the reaction before scaling it.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <span class="ps-number">PHASE 03</span>
+        <div class="ps-body">
+          <h3>Catalyse</h3>
+          <p>The agent is integrated, monitored, and tuned. Telemetry becomes the new brief: every output is measured, every drift is corrected.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof" id="proof">
+    <div class="proof-grid">
+      <div class="proof-cell"><span class="value">119</span><span class="label">Atomic Number</span></div>
+      <div class="proof-cell"><span class="value">4.2x</span><span class="label">Avg Output Gain</span></div>
+      <div class="proof-cell"><span class="value">72%</span><span class="label">Manual Time Cut</span></div>
+      <div class="proof-cell"><span class="value">∞</span><span class="label">Uptime Design</span></div>
+    </div>
+    <div class="quote">
+      <p>“Working with Absolute Intelligence felt less like hiring an agency and more like discovering a new raw material inside our own company.”</p>
+      <cite>— Director of Operations, Series B Fintech</cite>
+    </div>
+  </section>
+
+  <section class="cta" id="contact">
+    <div class="cta-element"><span>Ai</span></div>
+    <h2>Initiate<br/><span>synthesis.</span></h2>
+    <p>Tell us what you are building. We will respond with the smallest possible experiment that proves the largest possible value.</p>
+    <a class="cta-btn" href="mailto:hello@absoluteintelligence.ai">Begin Engagement →</a>
+  </section>
+
+  <footer>
+    <span>© 2026 Absolute Intelligence Ltd.</span>
+    <span>AGENTUM — Element 119</span>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script>
+    (function() {
+      'use strict';
+      var hasGSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+      if (hasGSAP) {
+        gsap.registerPlugin(ScrollTrigger);
+      }
+
+      // Entrance animations
+      if (hasGSAP) {
+        gsap.from('#elementBox', {
+          y: 40,
+          opacity: 0,
+          duration: 1.2,
+          ease: 'power3.out',
+          delay: 0.2
+        });
+        gsap.from('.hero-title h1, .hero-title p', {
+          y: 60,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.15,
+          ease: 'power3.out',
+          delay: 0.5
+        });
+        gsap.from('.atom', {
+          scale: 0.8,
+          opacity: 0,
+          rotation: -10,
+          duration: 1.6,
+          ease: 'power3.out'
+        });
+
+        // Mass counter
+        var counterObj = { val: 0 };
+        gsap.to(counterObj, {
+          val: 225,
+          duration: 2.5,
+          ease: 'power2.out',
+          delay: 0.8,
+          onUpdate: function() {
+            document.getElementById('massCounter').textContent = String(Math.round(counterObj.val)).padStart(3, '0');
+          }
+        });
+
+        // Scroll reveals
+        gsap.utils.toArray('.statement, .section-header, .service-cell, .proof-cell, .quote').forEach(function(el) {
+          gsap.from(el, {
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            },
+            y: 40,
+            opacity: 0,
+            duration: 0.9,
+            ease: 'power3.out'
+          });
+        });
+
+        // Horizontal scroll for process
+        var processInner = document.getElementById('processInner');
+        if (processInner) {
+          gsap.to(processInner, {
+            x: function() { return -(processInner.scrollWidth - window.innerWidth); },
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '.process',
+              start: 'top top',
+              end: function() { return '+=' + processInner.scrollWidth; },
+              pin: true,
+              scrub: 1,
+              anticipatePin: 1
+            }
+          });
+        }
+      } else {
+        // Graceful degradation: show everything static
+        document.getElementById('massCounter').textContent = '225';
+      }
+    })();
+  </script>
+</body>
+</html>
